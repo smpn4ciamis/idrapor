@@ -1355,6 +1355,10 @@
         classFilter.addEventListener('change', () => renderAdminStudentList(currentStudents));
       }
 
+     const missingDataFilter = document.getElementById('missingDataClassFilter');
+  if (missingDataFilter) {
+    missingDataFilter.addEventListener('change', renderMissingData);
+  }
       // Modal close listener
       const adminLoginModal = document.getElementById('adminLoginModal');
       if (adminLoginModal) {
@@ -1576,3 +1580,4 @@
  </body>
 
 </html>
+
