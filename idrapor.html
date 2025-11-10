@@ -1,0 +1,1563 @@
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Data Siswa</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    .form-container {
+      min-height: 100%;
+      overflow-y: auto;
+    }
+    
+    .input-field {
+      transition: all 0.3s ease;
+    }
+    
+    .input-field:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    
+    .action-btn {
+      transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .pulse-effect {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+      }
+    }
+    
+    .success-message {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .data-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .student-card {
+      transition: all 0.2s ease;
+    }
+    
+    .student-card:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Custom Scrollbar */
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 3px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    }
+
+    /* Shimmer Effect */
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shimmer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 2s infinite;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body><div id="splashScreen" class="form-container" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+   <div class="max-w-4xl mx-auto px-4 py-8"><div class="text-center mb-8">
+     <h1 class="text-5xl font-bold mb-4" style="color: white;">🎓 Data Identitas Rapor Siswa</h1>
+     <p class="text-xl mb-2" style="color: rgba(255, 255, 255, 0.9);">Pilih Kelas dan Nama Siswa</p>
+     <p class="text-sm" style="color: rgba(255, 255, 255, 0.7);">Untuk melanjutkan ke form input data</p><div class="mt-4"><button onclick="showAdminLogin()" class="px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105" style="background: rgba(255, 165, 0, 0.3); color: white; border: 2px solid rgba(255, 165, 0, 0.5);"> 👨‍💼 Panel Admin </button>
+     </div>
+    </div><div id="adminLoginModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(0, 0, 0, 0.8);">
+     <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-6">
+      <div class="text-center mb-6">
+       <div class="text-4xl mb-3">
+        🔐
+       </div>
+       <h3 class="text-2xl font-bold" style="color: #667eea;">Login Panel Admin</h3>
+       <p class="text-sm mt-2" style="color: #6b7280;">Masukkan password untuk mengakses panel admin</p>
+      </div>
+      <form id="adminLoginForm" class="space-y-4">
+       <div><label for="adminPassword" class="block text-sm font-medium mb-2" style="color: #374151;">🔑 Password Admin</label> <input type="password" id="adminPassword" name="adminPassword" required class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Masukkan password admin">
+       </div>
+       <div id="loginError" class="hidden p-3 rounded-lg" style="background: #fef2f2; border: 1px solid #fecaca;">
+        <p class="text-sm font-medium" style="color: #dc2626;">❌ Password salah! Silakan coba lagi.</p>
+       </div>
+       <div class="flex space-x-3"><button type="submit" class="flex-1 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:transform hover:scale-105" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> 🔓 Masuk </button> <button type="button" onclick="closeAdminLogin()" class="px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:transform hover:scale-105" style="background: #6b7280; color: white;"> ❌ Batal </button>
+       </div>
+      </form>
+     </div>
+    </div><div id="adminPanel" class="hidden mb-8">
+     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6"><div class="card p-6">
+       <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">📊 Statistik Database</h3>
+       <div class="space-y-3">
+        <div class="flex justify-between items-center p-3 rounded-lg" style="background: #f0f9ff;"><span class="font-medium" style="color: #0369a1;">Total Siswa:</span> <span id="totalStudents" class="font-bold text-lg" style="color: #0c4a6e;">0</span>
+        </div>
+        <div class="flex justify-between items-center p-3 rounded-lg" style="background: #f0fdf4;"><span class="font-medium" style="color: #166534;">Laki-laki:</span> <span id="maleCount" class="font-bold" style="color: #15803d;">0</span>
+        </div>
+        <div class="flex justify-between items-center p-3 rounded-lg" style="background: #fef7ff;"><span class="font-medium" style="color: #a21caf;">Perempuan:</span> <span id="femaleCount" class="font-bold" style="color: #be185d;">0</span>
+        </div>
+        <div class="flex justify-between items-center p-3 rounded-lg" style="background: #fffbeb;"><span class="font-medium" style="color: #d97706;">Data Lengkap:</span> <span id="completeDataCount" class="font-bold" style="color: #ea580c;">0</span>
+        </div>
+       </div><div class="mt-4 p-3 rounded-lg" style="background: #fef2f2;">
+        <div class="flex justify-between items-center mb-2"><span class="font-medium text-sm" style="color: #991b1b;">Kapasitas Database:</span> <span id="capacityText" class="font-bold text-sm" style="color: #dc2626;">0/999</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+         <div id="capacityBar" class="h-2 rounded-full transition-all duration-300" style="width: 0%; background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);"></div>
+        </div>
+       </div>
+      </div><div class="card p-6">
+       <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">👥 Siswa Terbaru</h3>
+       <div id="recentStudents" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+        <div class="text-center py-8 text-gray-500">
+         <div class="text-4xl mb-2">
+          📝
+         </div>
+         <p>Belum ada data siswa</p>
+        </div>
+       </div>
+      </div><div class="card p-6">
+       <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">⚠️ Belum Input Data</h3>
+       <div id="missingDataList" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+        <div class="text-center py-8 text-gray-500">
+         <div class="text-4xl mb-2">
+          ✅
+         </div>
+         <p>Memuat data...</p>
+        </div>
+       </div>
+      </div>
+     </div><div class="card p-6 mt-6">
+      <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">🗂️ Manajemen Data Siswa</h3><div class="mb-4 flex flex-col sm:flex-row gap-4">
+       <div class="flex-1"><input type="text" id="adminSearch" placeholder="🔍 Cari nama siswa..." class="w-full px-4 py-2 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;">
+       </div>
+       <div class="flex gap-2"><select id="classFilter" class="px-4 py-2 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;"> <option value="">Semua Kelas</option> <option value="VII-A">VII-A</option> <option value="VII-B">VII-B</option> <option value="VII-C">VII-C</option> <option value="VII-D">VII-D</option> <option value="VII-E">VII-E</option> <option value="VII-F">VII-F</option> <option value="VII-G">VII-G</option> </select> <button onclick="exportData()" class="px-4 py-2 rounded-lg font-medium text-white transition-all duration-200 hover:transform hover:scale-105" style="background: #10b981;"> 📊 Export </button>
+       </div>
+      </div><div id="adminStudentList" class="space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
+       <div class="text-center py-8 text-gray-500">
+        <div class="text-4xl mb-2">
+         👥
+        </div>
+        <p>Memuat data siswa...</p>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="card p-8 max-w-2xl mx-auto"><div class="mb-8">
+      <h2 class="text-2xl font-bold mb-4 text-center" style="color: #667eea;">📚 Pilih Kelas</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4"><button onclick="selectClass('VII-A')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #ff6b6b20, #ff8e8e20);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#ff6b6b" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#ff6b6b">
+           A
+          </text> <circle cx="20" cy="20" r="18" stroke="#ff6b6b" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #ff6b6b;">
+         VII-A
+        </div></button> <button onclick="selectClass('VII-B')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #4ecdc420, #45b7d120);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#4ecdc4" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#4ecdc4">
+           B
+          </text> <circle cx="20" cy="20" r="18" stroke="#4ecdc4" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #4ecdc4;">
+         VII-B
+        </div></button> <button onclick="selectClass('VII-C')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #45b7d120, #96ceb420);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#45b7d1" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#45b7d1">
+           C
+          </text> <circle cx="20" cy="20" r="18" stroke="#45b7d1" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #45b7d1;">
+         VII-C
+        </div></button> <button onclick="selectClass('VII-D')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #96ceb420, #feca5720);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#96ceb4" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#96ceb4">
+           D
+          </text> <circle cx="20" cy="20" r="18" stroke="#96ceb4" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #96ceb4;">
+         VII-D
+        </div></button> <button onclick="selectClass('VII-E')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #feca5720, #ff9ff320);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#feca57" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#feca57">
+           E
+          </text> <circle cx="20" cy="20" r="18" stroke="#feca57" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #feca57;">
+         VII-E
+        </div></button> <button onclick="selectClass('VII-F')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #ff9ff320, #f38ba820);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#ff9ff3" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#ff9ff3">
+           F
+          </text> <circle cx="20" cy="20" r="18" stroke="#ff9ff3" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #ff9ff3;">
+         VII-F
+        </div></button> <button onclick="selectClass('VII-G')" class="class-btn p-5 rounded-xl border-3 transition-all duration-300 hover:transform hover:scale-110 hover:rotate-2 hover:shadow-lg group" style="border-color: #e2e8f0; background: linear-gradient(135deg, #f38ba820, #a29bfe20);">
+        <div class="text-4xl mb-3 group-hover:animate-bounce">
+         <svg width="40" height="40" viewbox="0 0 40 40" class="mx-auto"><circle cx="20" cy="20" r="18" fill="#f38ba8" opacity="0.2" /> <text x="20" y="28" text-anchor="middle" font-size="20" font-weight="bold" fill="#f38ba8">
+           G
+          </text> <circle cx="20" cy="20" r="18" stroke="#f38ba8" stroke-width="2" fill="none" />
+         </svg>
+        </div>
+        <div class="font-bold text-sm" style="color: #f38ba8;">
+         VII-G
+        </div></button>
+      </div>
+      <div id="selectedClass" class="text-center mt-4 hidden">
+       <div class="inline-block px-4 py-2 rounded-lg" style="background: #667eea20; color: #667eea;"><span class="font-semibold">Kelas Terpilih: </span><span id="selectedClassName"></span>
+       </div>
+      </div>
+     </div><div id="studentSelection" class="hidden">
+      <h2 class="text-2xl font-bold mb-4 text-center" style="color: #667eea;">👥 Pilih Nama Siswa</h2><div class="mb-4"><input type="text" id="studentSearch" placeholder="🔍 Cari nama siswa..." class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;">
+      </div><div id="studentList" class="max-h-96 overflow-y-auto space-y-3 mb-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"></div>
+      <div id="selectedStudent" class="text-center mb-6 hidden">
+       <div class="inline-block px-4 py-2 rounded-lg" style="background: #10b98120; color: #10b981;"><span class="font-semibold">Siswa Terpilih: </span><span id="selectedStudentName"></span>
+       </div>
+      </div><button id="continueBtn" onclick="proceedToForm()" disabled class="w-full py-4 rounded-lg font-semibold text-white text-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> 📝 Lanjut ke Form Input Data </button>
+     </div>
+    </div>
+   </div>
+  </div><div id="mainApp" class="form-container hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+   <div class="max-w-6xl mx-auto px-4 py-8"><div class="text-center mb-8">
+     <h1 id="form-title" class="text-4xl font-bold mb-2" style="color: white;">📚 Data Identitas Rapor Siswa</h1>
+     <p id="form-subtitle" class="text-lg" style="color: rgba(255, 255, 255, 0.9);">Lengkapi data siswa untuk identitas rapor</p>
+     <div id="selectedInfo" class="mt-4">
+      <div class="inline-flex items-center space-x-4 px-6 py-3 rounded-lg" style="background: rgba(255, 255, 255, 0.2);">
+       <div class="flex items-center space-x-2"><span class="text-lg">📚</span> <span class="font-semibold" style="color: white;">Kelas: <span id="currentClass"></span></span>
+       </div>
+       <div class="flex items-center space-x-2"><span class="text-lg">👤</span> <span class="font-semibold" style="color: white;">Siswa: <span id="currentStudent"></span></span>
+       </div><button onclick="backToSplash()" class="px-3 py-1 rounded text-sm font-medium transition-all duration-200 hover:transform hover:scale-105" style="background: rgba(255, 255, 255, 0.2); color: white;"> 🔄 Ganti </button>
+      </div>
+     </div>
+    </div>
+    <div class="max-w-4xl mx-auto"><div class="card p-6">
+      <h2 class="text-2xl font-bold mb-6" style="color: #667eea;">Data Siswa</h2>
+      <form id="studentForm"><div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #4a5568;">👤 Data Pribadi</h3>
+        <div class="mb-4"><label for="nama_lengkap" class="block text-sm font-medium mb-2" style="color: #2d3748;">📝 Nama Lengkap Peserta Didik</label> <input type="text" id="nama_lengkap" name="nama_lengkap" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: GHAISAN AZFAR PUTRA">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="nis" class="block text-sm font-medium mb-2" style="color: #2d3748;">🆔 Nomor Induk</label> <input type="text" id="nis" name="nis" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 25267001">
+         </div>
+         <div><label for="nisn" class="block text-sm font-medium mb-2" style="color: #2d3748;">🔢 NISN</label> <input type="text" id="nisn" name="nisn" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 0123456789">
+         </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="tempat_lahir" class="block text-sm font-medium mb-2" style="color: #2d3748;">📍 Tempat Lahir</label> <input type="text" id="tempat_lahir" name="tempat_lahir" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Ciamis">
+         </div>
+         <div><label for="tanggal_lahir" class="block text-sm font-medium mb-2" style="color: #2d3748;">📅 Tanggal Lahir</label> <input type="date" id="tanggal_lahir" name="tanggal_lahir" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;">
+         </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="jenis_kelamin" class="block text-sm font-medium mb-2" style="color: #2d3748;">⚧ Jenis Kelamin</label> <select id="jenis_kelamin" name="jenis_kelamin" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;"> <option value="">Pilih jenis kelamin</option> <option value="Laki-laki">Laki-laki</option> <option value="Perempuan">Perempuan</option> </select>
+         </div>
+         <div><label for="agama" class="block text-sm font-medium mb-2" style="color: #2d3748;">☪️ Agama</label> <input type="text" id="agama" name="agama" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Islam">
+         </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="status_keluarga" class="block text-sm font-medium mb-2" style="color: #2d3748;">👨‍👩‍👧‍👦 Status dalam Keluarga</label> <input type="text" id="status_keluarga" name="status_keluarga" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Anak Kandung">
+         </div>
+         <div><label for="anak_ke" class="block text-sm font-medium mb-2" style="color: #2d3748;">🔢 Anak Ke</label> <input type="number" id="anak_ke" name="anak_ke" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 1">
+         </div>
+        </div>
+        <div class="mb-4"><label for="alamat" class="block text-sm font-medium mb-2" style="color: #2d3748;">🏠 Alamat Peserta Didik</label> <textarea id="alamat" name="alamat" rows="3" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Dusun Cibitung RT. 004 RW. 006 Kel. Cigembor Kec. Ciamis"></textarea>
+        </div>
+        <div class="mb-4"><label for="no_telepon" class="block text-sm font-medium mb-2" style="color: #2d3748;">📞 Nomor Telepon</label> <input type="tel" id="no_telepon" name="no_telepon" class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 08123456789 (Opsional)">
+        </div>
+       </div><div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #4a5568;">🏫 Data Sekolah</h3>
+        <div class="mb-4"><label for="sekolah_asal" class="block text-sm font-medium mb-2" style="color: #2d3748;">🎒 Sekolah Asal</label> <input type="text" id="sekolah_asal" name="sekolah_asal" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: SDN 1 Cigembor">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="kelas_diterima" class="block text-sm font-medium mb-2" style="color: #2d3748;">🚪 Diterima di Kelas</label> <input type="text" id="kelas_diterima" name="kelas_diterima" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: VII-A">
+         </div>
+         <div><label for="tanggal_diterima" class="block text-sm font-medium mb-2" style="color: #2d3748;">📅 Pada Tanggal</label> <input type="date" id="tanggal_diterima" name="tanggal_diterima" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;">
+         </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="kelas_sekarang" class="block text-sm font-medium mb-2" style="color: #2d3748;">📖 Kelas Sekarang</l abel> <input type="text" id="kelas_sekarang" name="kelas_sekarang" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: VII-A">
+         </div>
+         <div><label for="tahun_ajaran" class="block text-sm font-medium mb-2" style="color: #2d3748;">📆 Tahun Ajaran</label> <input type="text" id="tahun_ajaran" name="tahun_ajaran" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 2024/2025">
+         </div>
+        </div>
+       </div><div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #4a5568;">👨‍👩‍👧 Data Orang Tua</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="nama_ayah" class="block text-sm font-medium mb-2" style="color: #2d3748;">👨 Nama Ayah</label> <input type="text" id="nama_ayah" name="nama_ayah" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Budi Santoso">
+         </div>
+         <div><label for="nama_ibu" class="block text-sm font-medium mb-2" style="color: #2d3748;">👩 Nama Ibu</label> <input type="text" id="nama_ibu" name="nama_ibu" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Siti Aminah">
+         </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="pekerjaan_ayah" class="block text-sm font-medium mb-2" style="color: #2d3748;">💼 Pekerjaan Ayah</label> <input type="text" id="pekerjaan_ayah" name="pekerjaan_ayah" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Wiraswasta">
+         </div>
+         <div><label for="pekerjaan_ibu" class="block text-sm font-medium mb-2" style="color: #2d3748;">💼 Pekerjaan Ibu</label> <input type="text" id="pekerjaan_ibu" name="pekerjaan_ibu" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Ibu Rumah Tangga">
+         </div>
+        </div>
+        <div class="mb-4"><label for="alamat_orangtua" class="block text-sm font-medium mb-2" style="color: #2d3748;">🏠 Alamat Orang Tua</label> <textarea id="alamat_orangtua" name="alamat_orangtua" rows="3" required class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Dusun Cibitung RT. 004 RW. 006 Kel. Cigembor Kec. Ciamis"></textarea>
+        </div>
+        <div class="mb-4"><label for="no_telepon_orangtua" class="block text-sm font-medium mb-2" style="color: #2d3748;">📞 Nomor Telepon Orang Tua</label> <input type="tel" id="no_telepon_orangtua" name="no_telepon_orangtua" class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 08123456789 (Opsional)">
+        </div>
+       </div><div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4" style="color: #4a5568;">🧑‍⚖️ Data Wali (Opsional)</h3>
+        <div class="mb-4"><label for="nama_wali" class="block text-sm font-medium mb-2" style="color: #2d3748;">🧑‍⚖️ Nama Wali Peserta Didik</label> <input type="text" id="nama_wali" name="nama_wali" class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Dede Suryati (Opsional)">
+        </div>
+        <div class="mb-4"><label for="alamat_wali" class="block text-sm font-medium mb-2" style="color: #2d3748;">🏠 Alamat Wali Peserta Didik</label> <textarea id="alamat_wali" name="alamat_wali" rows="3" class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Cibitung Girang RT. 4 RW. 6 Kel. Cigembor Kec. Ciamis (Opsional)"></textarea>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+         <div><label for="no_telepon_wali" class="block text-sm font-medium mb-2" style="color: #2d3748;">📞 Nomor Telepon Wali</label> <input type="tel" id="no_telepon_wali" name="no_telepon_wali" class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: 08123456789 (Opsional)">
+         </div>
+         <div><label for="pekerjaan_wali" class="block text-sm font-medium mb-2" style="color: #2d3748;">💼 Pekerjaan Wali</label> <input type="text" id="pekerjaan_wali" name="pekerjaan_wali" class="input-field w-full px-4 py-3 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;" placeholder="Contoh: Karyawan Swasta (Opsional)">
+         </div>
+        </div>
+       </div><div id="connectionStatus" class="mb-4 p-3 rounded-lg flex items-center justify-center transition-all duration-300" style="background: #fefbeb; border: 1px solid #fde047;">
+        <div class="loading-spinner mr-3" style="border-top-color: #ca8a04; border-bottom-color: #ca8a0440; border-left-color: #ca8a0440; border-right-color: #ca8a0440;"></div>
+        <p class="text-sm font-medium" style="color: #ca8a04;">Menghubungkan ke database...</p>
+       </div><div id="successMessage" class="hidden success-message mb-4 p-4 rounded-lg border-2">
+        <p class="text-sm font-medium">✓ Data siswa berhasil disimpan!</p>
+       </div><div class="mb-6">
+        <label for="dataVerification" class="flex items-center space-x-3 cursor-pointer"> <input type="checkbox" id="dataVerification" name="dataVerification" required class="h-5 w-5 rounded transition-all duration-200" style="color: #667eea; border-color: #cbd5e1;"> <span classs="text-sm" style="color: #374151;"> <strong>Pernyataan:</strong> Saya menyatakan bahwa data yang saya masukkan adalah benar dan dapat dipertanggungjawabkan. </span> </label>
+       </div><div class="flex space-x-4"><button id="saveBtn" type="submit" class="action-btn flex-1 py-4 rounded-lg font-semibold text-white text-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"> 💾 Simpan Data Siswa </button> <button id="updateBtn" type="button" onclick="updateStudentData()" class="action-btn hidden flex-1 py-4 rounded-lg font-semibold text-white text-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);"> 🔄 Ubah Data Siswa </button> <button id="cancelEditBtn" type="button" onclick="cancelEdit()" class="action-btn hidden px-6 py-4 rounded-lg font-semibold text-white" style="background: #6b7280;"> ❌ Batal Edit </button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div><div id="loadingOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(0, 0, 0, 0.7);">
+   <div class="text-center p-8 rounded-lg" style="background: white;">
+    <div class="loading-spinner h-12 w-12 mx-auto mb-4" style="border-width: 4px;"></div>
+    <p id="loadingMessage" class="text-lg font-medium" style="color: #374151;">Memproses...</p>
+   </div>
+  </div><script>
+    // ######################################################
+    // PENGATURAN DATABASE (WAJIB DIUBAH)
+    // ######################################################
+    
+    // GANTI URL INI DENGAN URL API SHEETDB ANDA
+    const SHEETDB_API_URL = 'https://sheetdb.io/api/v1/77xcm6rgpzohy'; 
+    
+    // ######################################################
+    
+    // Variabel Global
+    const defaultConfig = {
+      form_title: "📚 Data Identitas Rapor Siswa",
+      form_subtitle: "Lengkapi data siswa untuk identitas rapor",
+      submit_button_text: "💾 Simpan Data Siswa",
+      background_color: "#667eea",
+      surface_color: "#ffffff",
+      text_color: "#2d3748",
+      primary_action_color: "#667eea",
+      secondary_action_color: "#764ba2",
+      font_family: "system-ui",
+      font_size: 16
+    };
+
+    let currentStudents = [];
+    let currentEditingStudent = null;
+    let studentDatabase = {}; // Akan diisi dari siswa.json
+    let selectedClassValue = '';
+    let selectedStudentValue = '';
+    let isDataReady = false; // Flag untuk status data dari SheetDB
+
+    // Admin Panel Functions
+    const ADMIN_PASSWORD = 'admin123'; // Password default
+    let isAdminLoggedIn = false;
+    
+    // ######################################################
+    // FUNGSI BARU (PENGGANTI DATA SDK)
+    // ######################################################
+
+    /**
+     * Memuat data siswa dari Google Sheet melalui SheetDB.
+     */
+    async function loadDataFromSheet() {
+      console.log('Memuat data dari Google Sheet...');
+      updateConnectionStatus('loading', 'Menghubungkan...', 'Menghubungkan ke database...');
+      showLoading('Memuat data siswa...');
+
+      try {
+        const response = await fetch(SHEETDB_API_URL);
+        if (!response.ok) {
+          throw new Error(`Server merespon dengan status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Memproses data (SheetDB mengembalikan array of objects)
+        currentStudents = data;
+        isDataReady = true;
+        
+        console.log('Data berhasil dimuat:', data.length, 'record');
+        updateConnectionStatus('connected', 'Terhubung', 'Koneksi database berhasil.');
+        showMessage('Data siswa berhasil dimuat dari database.', 'success');
+        
+        // Render data ke UI
+        renderStudentList(currentStudents);
+        updateStatistics(currentStudents);
+        
+      } catch (error) {
+        console.error('Gagal memuat data dari SheetDB:', error);
+        isDataReady = false;
+        updateConnectionStatus('error', 'Gagal', 'Gagal terhubung ke database. Periksa koneksi internet atau URL API.');
+        showMessage('Gagal memuat data dari database. Coba refresh halaman.', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /**
+     * Menyimpan data siswa baru ke Google Sheet.
+     */
+    async function createStudentData(studentData) {
+      console.log('Menyimpan data baru...');
+      showLoading('Menyimpan data...');
+
+      try {
+        const response = await fetch(SHEETDB_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // SheetDB biasanya mengharapkan data dibungkus dalam { "data": [...] }
+          body: JSON.stringify({ data: [studentData] }) 
+        });
+
+        if (!response.ok) {
+           const errorData = await response.json();
+           console.error('Error response dari SheetDB:', errorData);
+           throw new Error(`Gagal menyimpan data. Status: ${response.status}`);
+        }
+
+        await response.json(); // Menunggu konfirmasi simpan
+        
+        console.log('Data berhasil disimpan.');
+        showMessage('Data siswa baru berhasil disimpan ke Google Sheet!', 'success');
+        
+        // Muat ulang data dari sheet untuk sinkronisasi
+        await loadDataFromSheet(); 
+        return { isOk: true, data: studentData };
+
+      } catch (error) {
+        console.error('Error saat menyimpan data baru:', error);
+        showMessage('Gagal menyimpan data ke Google Sheet. Silakan coba lagi.', 'error');
+        return { isOk: false, error: error.message };
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /**
+     * Memperbarui data siswa yang ada di Google Sheet.
+     * Menggunakan kolom unik (NIS atau NISN) untuk mencari data yang akan di-update.
+     */
+    async function updateStudentDataInSheet(studentData) {
+      console.log('Memperbarui data...');
+      showLoading('Memperbarui data...');
+      
+      // Tentukan kolom unik untuk update, misal 'nis'
+      // Pastikan kolom ini ada di Google Sheet Anda!
+      const uniqueColumn = 'nis'; 
+      const uniqueValue = studentData.nis;
+
+      if (!uniqueValue) {
+        showMessage('Gagal memperbarui data: NIS tidak ditemukan.', 'error');
+        hideLoading();
+        return { isOk: false, error: 'NIS tidak ada' };
+      }
+
+      try {
+        const response = await fetch(`${SHEETDB_API_URL}/${uniqueColumn}/${uniqueValue}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // SheetDB butuh { "data": {...} } untuk PUT
+          body: JSON.stringify({ data: studentData }) 
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Error response dari SheetDB (PUT):', errorData);
+          throw new Error(`Gagal memperbarui data. Status: ${response.status}`);
+        }
+
+        await response.json(); // Menunggu konfirmasi update
+        
+        console.log('Data berhasil diperbarui.');
+        showMessage('Data siswa berhasil diperbarui di Google Sheet!', 'success');
+        
+        // Muat ulang data dari sheet untuk sinkronisasi
+        await loadDataFromSheet();
+        
+        // Reset state editing
+        currentEditingStudent = null;
+        showSaveButton();
+        document.getElementById('studentForm').reset();
+        document.getElementById('dataVerification').checked = false;
+        
+        return { isOk: true, data: studentData };
+
+      } catch (error) {
+        console.error('Error saat memperbarui data:', error);
+        showMessage('Gagal memperbarui data di Google Sheet. Coba lagi.', 'error');
+        return { isOk: false, error: error.message };
+      } finally {
+        hideLoading();
+      }
+    }
+
+    /**
+     * Menghapus data siswa dari Google Sheet.
+     * Menggunakan kolom unik (NIS atau NISN) untuk mencari data yang akan dihapus.
+     */
+    async function deleteStudentDataFromSheet(student) {
+      console.log('Menghapus data...');
+      
+      // Tentukan kolom unik untuk delete, misal 'nis'
+      const uniqueColumn = 'nis';
+      const uniqueValue = student.nis;
+      const studentName = student.nama_lengkap;
+
+      if (!uniqueValue) {
+        showMessage('Gagal menghapus data: NIS tidak ditemukan.', 'error');
+        return { isOk: false, error: 'NIS tidak ada' };
+      }
+      
+      showLoading(`Menghapus data ${studentName}...`);
+
+      try {
+        const response = await fetch(`${SHEETDB_API_URL}/${uniqueColumn}/${uniqueValue}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('Error response dari SheetDB (DELETE):', errorData);
+          throw new Error(`Gagal menghapus data. Status: ${response.status}`);
+        }
+
+        await response.json(); // Menunggu konfirmasi hapus
+
+        console.log('Data berhasil dihapus.');
+        showMessage(`Data ${studentName} berhasil dihapus!`, 'success');
+        
+        // Muat ulang data dari sheet untuk sinkronisasi
+        await loadDataFromSheet();
+        return { isOk: true };
+
+      } catch (error) {
+        console.error('Error saat menghapus data:', error);
+        showMessage(`Gagal menghapus data ${studentName}`, 'error');
+        return { isOk: false, error: error.message };
+      } finally {
+        hideLoading();
+      }
+    }
+
+
+    // ######################################################
+    // FUNGSI LAMA (DISESUAIKAN)
+    // ######################################################
+
+    function renderStudentList(students) {
+      // Update admin panel if visible
+      if (!document.getElementById('adminPanel').classList.contains('hidden')) {
+        renderAdminStudentList(students);
+      }
+      console.log('Student data updated:', students.length, 'records');
+    }
+
+    function updateStatistics(students) {
+      // Update admin statistics
+      updateAdminStatistics(students);
+      // Check data limit for form validation
+      if (students.length >= 999) {
+        console.log('Database capacity limit reached');
+      }
+    }
+
+    function showAdminLogin() {
+      document.getElementById('adminLoginModal').classList.remove('hidden');
+      document.getElementById('adminPassword').focus();
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('adminLoginModal').classList.add('hidden');
+      document.getElementById('adminPassword').value = '';
+      document.getElementById('loginError').classList.add('hidden');
+    }
+
+    function adminLogin(event) {
+      event.preventDefault();
+      const password = document.getElementById('adminPassword').value;
+      if (password === ADMIN_PASSWORD) {
+        isAdminLoggedIn = true;
+        closeAdminLogin();
+        document.getElementById('adminPanel').classList.remove('hidden');
+        renderAdminStudentList(currentStudents);
+        updateAdminStatistics(currentStudents);
+        renderMissingData();
+        showMessage('Login admin berhasil!', 'success');
+      } else {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    }
+
+    function updateAdminStatistics(students) {
+      const total = students.length;
+      const male = students.filter(s => s.jenis_kelamin === 'Laki-laki').length;
+      const female = students.filter(s => s.jenis_kelamin === 'Perempuan').length;
+      const complete = students.filter(s => s.nama_lengkap && s.nis && s.nisn && s.nama_ayah && s.nama_ibu).length;
+      const capacity = 999;
+
+      document.getElementById('totalStudents').textContent = total;
+      document.getElementById('maleCount').textContent = male;
+      document.getElementById('femaleCount').textContent = female;
+      document.getElementById('completeDataCount').textContent = complete;
+      document.getElementById('capacityText').textContent = `${total}/${capacity}`;
+      
+      const capacityPercent = (total / capacity) * 100;
+      document.getElementById('capacityBar').style.width = `${capacityPercent}%`;
+      
+      renderRecentStudents(students);
+      renderMissingData();
+    }
+
+    function renderRecentStudents(students) {
+      const recentContainer = document.getElementById('recentStudents');
+      // Sort by 'created_at' if available, otherwise just take last 5
+      // SheetDB tidak otomatis menambah 'created_at', jadi kita sortir berdasarkan urutan data saja (data terbaru di akhir)
+      const recentStudents = [...students].reverse().slice(0, 5);
+
+      if (recentStudents.length === 0) {
+        recentContainer.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <div class="text-4xl mb-2">📝</div>
+            <p>Belum ada data siswa</p>
+          </div>
+        `;
+        return;
+      }
+
+      recentContainer.innerHTML = recentStudents.map(student => `
+        <div class="student-card p-3 rounded-lg border-2 transition-all duration-200" style="border-color: #e2e8f0; background: #f8fafc;">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-sm truncate" style="color: #2d3748;">${student.nama_lengkap}</div>
+              <div class="text-xs opacity-70" style="color: #667eea;">${student.kelas_sekarang || 'Kelas tidak diisi'}</div>
+            </div>
+            ${student.created_at ? `<div class="text-xs opacity-60" style="color: #6b7280;">
+              ${new Date(student.created_at).toLocaleDateString('id-ID')}
+            </div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMissingData() {
+      const missingContainer = document.getElementById('missingDataList');
+      if (Object.keys(studentDatabase).length === 0) {
+          missingContainer.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <div class="text-4xl mb-2">⚠️</div>
+            <p>File 'siswa.json' belum dimuat. Tidak bisa cek data yang hilang.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      const allStudentNames = Object.keys(studentDatabase);
+      const existingNames = currentStudents.map(s => s.nama_lengkap);
+      const missingStudents = allStudentNames.filter(name => !existingNames.includes(name));
+
+      if (missingStudents.length === 0) {
+        missingContainer.innerHTML = `
+          <div class="text-center py-8" style="color: #10b981;">
+            <div class="text-4xl mb-2">✅</div>
+            <p class="font-medium">Semua data siswa sudah lengkap!</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = missingStudents.slice(0, 5).map(name => {
+        const studentInfo = studentDatabase[name];
+        return `
+          <div class="student-card p-3 rounded-lg border-2" style="border-color: #fecaca; background: #fef2f2;">
+            <div class="flex items-center justify-between">
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm truncate" style="color: #991b1b;">${name}</div>
+                <div class="text-xs opacity-70" style="color: #b91c1c;">${studentInfo.kelas || 'Kelas tidak diketahui'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      if (missingStudents.length > 5) {
+        html += `
+          <div class="p-2 text-center text-xs" style="color: #991b1b;">
+            ...dan ${missingStudents.length - 5} siswa lainnya
+          </div>
+        `;
+      }
+      
+      missingContainer.innerHTML = html;
+    }
+
+    function renderAdminStudentList(students) {
+      const listContainer = document.getElementById('adminStudentList');
+      const searchTerm = document.getElementById('adminSearch').value.toLowerCase();
+      const classFilter = document.getElementById('classFilter').value;
+
+      let filteredStudents = students;
+
+      if (searchTerm) {
+        filteredStudents = filteredStudents.filter(student => 
+          student.nama_lengkap && student.nama_lengkap.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      if (classFilter) {
+        filteredStudents = filteredStudents.filter(student => student.kelas_sekarang === classFilter);
+      }
+
+      if (filteredStudents.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-8 text-gray-500">
+            <div class="text-4xl mb-2">🔍</div>
+            <p>Tidak ada data yang sesuai dengan pencarian</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = filteredStudents.map(student => `
+        <div class="student-card p-4 rounded-lg border-2 transition-all duration-200" style="border-color: #e2e8f0; background: #f8fafc;">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-base truncate" style="color: #2d3748;">${student.nama_lengkap}</div>
+              <div class="text-sm opacity-70 mt-1" style="color: #667eea;">
+                ${student.kelas_sekarang || 'Kelas tidak diisi'} • NIS: ${student.nis} • NISN: ${student.nisn}
+              </div>
+            </div>
+            <div class="flex space-x-2 ml-4">
+              <button onclick="editStudent('${student.nis}')" class="action-btn p-2 rounded-full transition-all duration-200" style="background: #fef9c3; color: #ca8a04;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewbox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+              </button>
+              <button onclick="confirmDeleteStudent('${student.nis}', this)" class="action-btn p-2 rounded-full transition-all duration-200" style="background: #fee2e2; color: #dc2626;">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewbox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function editStudent(nis) {
+      const student = currentStudents.find(s => s.nis === nis);
+      if (student) {
+        fillFormWithStudentData(student);
+        currentEditingStudent = student;
+        showUpdateButtons();
+        // Switch to main app view
+        document.getElementById('splashScreen').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        window.scrollTo(0, 0);
+        showMessage('Mode edit diaktifkan. Ubah data yang diperlukan lalu klik "Ubah Data Siswa".', 'info');
+      } else {
+        showMessage('Data siswa tidak ditemukan untuk diedit.', 'error');
+      }
+    }
+
+    function confirmDeleteStudent(nis, button) {
+      const student = currentStudents.find(s => s.nis === nis);
+      if (!student) return;
+
+      const studentCard = button.closest('.student-card');
+      const originalContent = studentCard.innerHTML;
+      
+      studentCard.innerHTML = `
+        <div class="p-4 rounded-lg" style="background: #fef2f2;">
+          <p class="font-medium text-center" style="color: #991b1b;">Yakin ingin menghapus ${student.nama_lengkap}?</p>
+          <div class="flex space-x-2 mt-3">
+            <button onclick="deleteStudent('${nis}')" class="flex-1 px-3 py-2 text-sm rounded-lg font-medium text-white" style="background: #dc2626;">Ya, Hapus</button>
+            <button onclick="cancelDeleteStudent(this, \`${originalContent.replace(/`/g, '\\`')}\`)" class="flex-1 px-3 py-2 text-sm rounded-lg font-medium" style="background: #e5e7eb;">Batal</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function deleteStudent(nis) {
+      const student = currentStudents.find(s => s.nis === nis);
+      if (!student) return;
+      
+      // Panggil fungsi baru
+      const result = await deleteStudentDataFromSheet(student);
+      
+      // loadDataFromSheet() akan otomatis dipanggil di dalam deleteStudentDataFromSheet jika sukses
+    }
+
+    function cancelDeleteStudent(button, originalContent) {
+      const studentCard = button.closest('.student-card');
+      studentCard.innerHTML = originalContent;
+    }
+
+    function exportData() {
+      if (currentStudents.length === 0) {
+        showMessage('Tidak ada data untuk diekspor', 'error');
+        return;
+      }
+      
+      // Create CSV content
+      const headers = [
+        'Nama Lengkap', 'NIS', 'NISN', 'Tempat Lahir', 'Tanggal Lahir', 'Jenis Kelamin', 'Agama', 
+        'Status Keluarga', 'Anak Ke', 'Sekolah Asal', 'Alamat', 'No Telepon', 'Nama Ayah', 'Nama Ibu', 
+        'Pekerjaan Ayah', 'Pekerjaan Ibu', 'Alamat Orang Tua', 'No Telepon Orang Tua', 'Nama Wali', 
+        'Alamat Wali', 'Pekerjaan Wali', 'No Telepon Wali', 'Kelas Diterima', 'Tanggal Diterima', 
+        'Kelas Sekarang', 'Tahun Ajaran'
+      ];
+
+      const csvContent = [
+        headers.join(','),
+        ...currentStudents.map(student => [
+          `"${student.nama_lengkap || ''}"`,
+          `"${student.nis || ''}"`,
+          `"${student.nisn || ''}"`,
+          `"${student.tempat_lahir || ''}"`,
+          `"${student.tanggal_lahir || ''}"`,
+          `"${student.jenis_kelamin || ''}"`,
+          `"${student.agama || ''}"`,
+          `"${student.status_keluarga || ''}"`,
+          `"${student.anak_ke || ''}"`,
+          `"${student.sekolah_asal || ''}"`,
+          `"${(student.alamat || '').replace(/"/g, '""')}"`,
+          `"${student.no_telepon || ''}"`,
+          `"${student.nama_ayah || ''}"`,
+          `"${student.nama_ibu || ''}"`,
+          `"${student.pekerjaan_ayah || ''}"`,
+          `"${student.pekerjaan_ibu || ''}"`,
+          `"${(student.alamat_orangtua || '').replace(/"/g, '""')}"`,
+          `"${student.no_telepon_orangtua || ''}"`,
+          `"${student.nama_wali || ''}"`,
+          `"${(student.alamat_wali || '').replace(/"/g, '""')}"`,
+          `"${student.pekerjaan_wali || ''}"`,
+          `"${student.no_telepon_wali || ''}"`,
+          `"${student.kelas_diterima || ''}"`,
+          `"${student.tanggal_diterima || ''}"`,
+          `"${student.kelas_sekarang || ''}"`,
+          `"${student.tahun_ajaran || ''}"`
+        ].join(','))
+      ].join('\n');
+      
+      // Create and download CSV file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `data_siswa_rapor_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showMessage('Data berhasil diekspor ke CSV!', 'success');
+    }
+
+    // Splash Screen Functions
+    function selectClass(className) {
+      selectedClassValue = className;
+      
+      // Update UI
+      document.querySelectorAll('.class-btn').forEach(btn => {
+        btn.style.borderColor = '#e2e8f0';
+        btn.style.background = 'linear-gradient(135deg, #ffffff, #f7fafc)';
+      });
+      event.currentTarget.style.borderColor = '#667eea';
+      event.currentTarget.style.background = 'linear-gradient(135deg, #667eea20, #764ba220)';
+      
+      document.getElementById('selectedClassName').textContent = className;
+      document.getElementById('selectedClass').classList.remove('hidden');
+      
+      // Populate student list
+      populateStudentList(className);
+      document.getElementById('studentSelection').classList.remove('hidden');
+    }
+
+    function populateStudentList(className) {
+      const listContainer = document.getElementById('studentList');
+      if (Object.keys(studentDatabase).length === 0) {
+        listContainer.innerHTML = `<div class="text-center p-4 text-red-600">Gagal memuat daftar siswa (siswa.json tidak ditemukan).</div>`;
+        return;
+      }
+
+      const studentsInClass = Object.keys(studentDatabase).filter(name => {
+        return studentDatabase[name].kelas === className;
+      });
+
+      if (studentsInClass.length === 0) {
+        listContainer.innerHTML = `<div class="text-center p-4 text-gray-500">Tidak ada siswa ditemukan untuk kelas ${className}.</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = studentsInClass.map(studentName => {
+        const student = studentDatabase[studentName];
+        return `
+          <button onclick="selectStudent(this, '${studentName}')" class="student-btn w-full text-left p-4 rounded-lg border-2 transition-all duration-200" style="border-color: #e2e8f0; background: #f7fafc;">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-semibold" style="color: #2d3748;">${studentName}</div>
+                <div class="text-sm opacity-70" style="color: #4a5568;">NIS: ${student.nis}</div>
+              </div>
+              <div id="status-${student.nis}" class="text-sm">
+                </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      // Add search functionality
+      const searchInput = document.getElementById('studentSearch');
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const studentButtons = document.querySelectorAll('.student-btn');
+        studentButtons.forEach(btn => {
+          const studentName = btn.querySelector('.font-semibold').textContent.toLowerCase();
+          if (studentName.includes(searchTerm)) {
+            btn.style.display = 'block';
+          } else {
+            btn.style.display = 'none';
+          }
+        });
+      });
+      
+      // Check data status
+      checkStudentData(studentsInClass);
+    }
+    
+    function checkStudentData(studentsInClass) {
+        // Cek data setelah data dari SheetDB siap
+        if (!isDataReady) {
+            console.log("Menunggu data dari SheetDB... Coba lagi dalam 1 detik.");
+            setTimeout(() => checkStudentData(studentsInClass), 1000); // Coba lagi
+            return;
+        }
+        
+        console.log("Mengecek status data siswa...");
+        const existingNis = currentStudents.map(s => s.nis);
+        
+        studentsInClass.forEach(studentName => {
+            const studentInfo = studentDatabase[studentName];
+            const statusEl = document.getElementById(`status-${studentInfo.nis}`);
+            if (statusEl) {
+                if (existingNis.includes(studentInfo.nis)) {
+                    statusEl.innerHTML = `<span class="px-3 py-1 rounded-full font-medium text-xs" style="background: #dcfce7; color: #16a34a;">✅ Lengkap</span>`;
+                } else {
+                    statusEl.innerHTML = `<span class="px-3 py-1 rounded-full font-medium text-xs" style="background: #fee2e2; color: #dc2626;">⚠️ Belum</span>`;
+                }
+            }
+        });
+    }
+
+    function selectStudent(button, studentName) {
+      selectedStudentValue = studentName;
+      
+      // Update UI
+      document.querySelectorAll('.student-btn').forEach(btn => {
+        btn.style.borderColor = '#e2e8f0';
+        btn.style.background = '#f7fafc';
+      });
+      
+      button.style.borderColor = '#10b981';
+      button.style.background = '#10b98120';
+      
+      document.getElementById('selectedStudentName').textContent = studentName;
+      document.getElementById('selectedStudent').classList.remove('hidden');
+      
+      // Enable continue button
+      document.getElementById('continueBtn').disabled = false;
+    }
+
+    function proceedToForm() {
+      if (!selectedClassValue || !selectedStudentValue) {
+        showMessage('Pilih kelas dan siswa terlebih dahulu.', 'error');
+        return;
+      }
+      
+      // Check if student data already exists
+      const studentInfo = studentDatabase[selectedStudentValue];
+      const existingStudent = currentStudents.find(s => s.nis === studentInfo.nis);
+      
+      if (existingStudent) {
+        // Data exists, fill form for editing
+        fillFormWithStudentData(existingStudent);
+        currentEditingStudent = existingStudent;
+        showUpdateButtons();
+        showMessage('Data siswa ini sudah ada. Anda sekarang dalam mode edit.', 'info');
+      } else {
+        // Data doesn't exist, prepare new form
+        document.getElementById('studentForm').reset();
+        document.getElementById('dataVerification').checked = false;
+        
+        // Pre-fill from studentDatabase
+        document.getElementById('nama_lengkap').value = selectedStudentValue;
+        document.getElementById('nis').value = studentInfo.nis;
+        document.getElementById('nisn').value = studentInfo.nisn;
+        document.getElementById('kelas_sekarang').value = studentInfo.kelas;
+        document.getElementById('kelas_diterima').value = studentInfo.kelas; // Asumsi
+        
+        currentEditingStudent = null;
+        showSaveButton();
+      }
+      
+      // Update header
+      document.getElementById('currentClass').textContent = selectedClassValue;
+      document.getElementById('currentStudent').textContent = selectedStudentValue;
+      
+      // Switch views
+      document.getElementById('splashScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      window.scrollTo(0, 0);
+    }
+    
+    function backToSplash() {
+      // Switch views
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('splashScreen').classList.remove('hidden');
+      
+      // Reset selections
+      selectedClassValue = '';
+      selectedStudentValue = '';
+      document.getElementById('studentSelection').classList.add('hidden');
+      document.getElementById('selectedClass').classList.add('hidden');
+      document.getElementById('selectedStudent').classList.add('hidden');
+      document.getElementById('continueBtn').disabled = true;
+      document.getElementById('studentSearch').value = '';
+      document.querySelectorAll('.class-btn').forEach(btn => {
+        btn.style.borderColor = '#e2e8f0';
+        btn.style.background = 'linear-gradient(135deg, #ffffff, #f7fafc)';
+      });
+      
+      // Reset form state
+      document.getElementById('studentForm').reset();
+      document.getElementById('dataVerification').checked = false;
+      currentEditingStudent = null;
+      showSaveButton();
+      
+      // Muat ulang data untuk memastikan admin panel (jika terbuka) tetap update
+      loadDataFromSheet();
+    }
+    
+    // Form and Data Handling
+    function onConfigChange(config) {
+      // Apply config to elements
+      document.getElementById('form-title').textContent = config.form_title || defaultConfig.form_title;
+      document.getElementById('form-subtitle').textContent = config.form_subtitle || defaultConfig.form_subtitle;
+      document.getElementById('saveBtn').textContent = config.submit_button_text || defaultConfig.submit_button_text;
+      
+      // Apply colors
+      const root = document.documentElement;
+      root.style.setProperty('--background-color', config.background_color || defaultConfig.background_color);
+      root.style.setProperty('--surface-color', config.surface_color || defaultConfig.surface_color);
+      root.style.setProperty('--text-color', config.text_color || defaultConfig.text_color);
+      root.style.setProperty('--primary-action-color', config.primary_action_color || defaultConfig.primary_action_color);
+      
+      // Apply font
+      document.body.style.fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+      document.body.style.fontSize = `${fontSize}px`;
+      
+      // Adjust related font sizes
+      const title = document.getElementById('form-title');
+      const formSubtitle = document.getElementById('form-subtitle');
+      title.style.fontSize = `${fontSize * 2}px`;
+      formSubtitle.style.fontSize = `${fontSize * 1.125}px`;
+    }
+
+    // Button Management Functions
+    function showSaveButton() {
+      document.getElementById('saveBtn').classList.remove('hidden');
+      document.getElementById('updateBtn').classList.add('hidden');
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+    }
+
+    function showUpdateButtons() {
+      document.getElementById('saveBtn').classList.add('hidden');
+      document.getElementById('updateBtn').classList.remove('hidden');
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+    }
+
+    // Update Student Data Function
+    async function updateStudentData() {
+      if (!currentEditingStudent) return;
+      
+      // Check if data verification checkbox is checked
+      const dataVerificationCheckbox = document.getElementById('dataVerification');
+      if (!dataVerificationCheckbox.checked) {
+        showMessage('Harap centang pernyataan kebenaran data sebelum menyimpan!', 'error');
+        return;
+      }
+      
+      const updateBtn = document.getElementById('updateBtn');
+      const originalText = updateBtn.innerHTML;
+      updateBtn.disabled = true;
+      updateBtn.innerHTML = '<span class="flex items-center justify-center"><span class="loading-spinner mr-3"></span>Mengubah...</span>';
+      
+      const formData = new FormData(document.getElementById('studentForm'));
+      const studentData = Object.fromEntries(formData.entries());
+      
+      // Panggil fungsi baru
+      const result = await updateStudentDataInSheet(studentData);
+
+      if (result.isOk) {
+        // Berhasil, tampilkan preview
+        showStudentPreview(result.data, 'update');
+      } else {
+        // Gagal, tampilkan pesan error (sudah ditangani di dalam updateStudentDataInSheet)
+        console.error('Update failed:', result.error);
+      }
+      
+      updateBtn.disabled = false;
+      updateBtn.innerHTML = originalText;
+    }
+
+    // Cancel Edit Function
+    function cancelEdit() {
+      // Reset form
+      document.getElementById('studentForm').reset();
+      document.getElementById('dataVerification').checked = false;
+      // Reset editing state
+      currentEditingStudent = null;
+      showSaveButton();
+      // Back to splash screen
+      backToSplash();
+      showMessage('Edit dibatalkan. Kembali ke pemilihan siswa.', 'info');
+    }
+
+    async function initializeApp() {
+      console.log('Initializing app...');
+      
+      // 1. Muat data referensi siswa (NIS/NISN) dari file JSON
+      try {
+        const response = await fetch('siswa.json'); // Ambil data dari file
+        if (!response.ok) {
+          throw new Error('Gagal memuat siswa.json. Pastikan file ada di folder yang sama.');
+        }
+        studentDatabase = await response.json();
+        console.log('Data referensi siswa (NIS/NISN) berhasil dimuat.');
+        window.studentDatabase = studentDatabase; // Jadikan global jika perlu
+      } catch (error) {
+        console.error(error);
+        alert('PENTING: Gagal memuat data referensi siswa (siswa.json). Validasi NIS/NISN mungkin tidak berfungsi.');
+      }
+      
+      // 2. Muat data yang sudah ada dari Google Sheet
+      // Panggil fungsi baru
+      await loadDataFromSheet();
+      
+      // 3. (Opsional) Inisialisasi Element SDK jika masih dipakai untuk config
+      if (window.elementSdk) {
+        try {
+          window.elementSdk.init({
+            defaultConfig,
+            onConfigChange,
+            mapToCapabilities: (config) => ({
+              // ...
+            })
+          });
+        } catch (error) {
+          console.error('Error initializing Element SDK:', error);
+        }
+      }
+      
+      // ... sisa inisialisasi UI
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeApp();
+      
+      // Form submission handler
+      const form = document.getElementById('studentForm');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          // Cek koneksi
+          if (!isDataReady) {
+              showMessage('Database belum siap atau koneksi gagal. Silakan tunggu atau refresh halaman.', 'error');
+              return;
+          }
+
+          // Check if data verification checkbox is checked
+          const dataVerificationCheckbox = document.getElementById('dataVerification');
+          if (!dataVerificationCheckbox.checked) {
+            showMessage('Harap centang pernyataan kebenaran data sebelum menyimpan!', 'error');
+            return;
+          }
+          
+          const saveBtn = document.getElementById('saveBtn');
+          const originalText = saveBtn.innerHTML;
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<span class="flex items-center justify-center"><span class="loading-spinner mr-3"></span>Menyimpan...</span>';
+          
+          const formData = new FormData(form);
+          const studentData = Object.fromEntries(formData.entries());
+
+          // Panggil fungsi baru
+          const result = await createStudentData(studentData);
+          
+          if (result.isOk) {
+            form.reset();
+            document.getElementById('dataVerification').checked = false;
+            // Tampilkan preview setelah sukses
+            showStudentPreview(studentData, 'create');
+          } else {
+            // Pesan error sudah ditangani di dalam createStudentData
+            console.error('Create failed:', result.error);
+          }
+          
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalText;
+        });
+      }
+      
+      // Admin login form handler
+      const adminForm = document.getElementById('adminLoginForm');
+      if (adminForm) {
+        adminForm.addEventListener('submit', adminLogin);
+      }
+      
+      // Admin search and filter listeners
+      const adminSearch = document.getElementById('adminSearch');
+      if (adminSearch) {
+        adminSearch.addEventListener('input', () => renderAdminStudentList(currentStudents));
+      }
+      const classFilter = document.getElementById('classFilter');
+      if (classFilter) {
+        classFilter.addEventListener('change', () => renderAdminStudentList(currentStudents));
+      }
+
+      // Modal close listener
+      const adminLoginModal = document.getElementById('adminLoginModal');
+      if (adminLoginModal) {
+        adminLoginModal.addEventListener('click', (e) => {
+          if (e.target === adminLoginModal) {
+            closeAdminLogin();
+          }
+        });
+      }
+      
+      // Add keyboard shortcut for admin login (Ctrl + Alt + A)
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.altKey && e.key === 'a') {
+          e.preventDefault();
+          showAdminLogin();
+        }
+      });
+    });
+
+    // ######################################################
+    // FUNGSI UTILITAS (TIDAK BERUBAH BANYAK)
+    // ######################################################
+
+    function showMessage(message, type) {
+      const successMsg = document.getElementById('successMessage');
+      const colors = {
+        error: { text: '#721c24', bg: '#f8d7da', border: '#f5c6cb', icon: '✗' },
+        success: { text: '#155724', bg: '#d4edda', border: '#c3e6cb', icon: '✓' },
+        info: { text: '#0c5460', bg: '#d1ecf1', border: '#bee5eb', icon: 'ℹ' }
+      };
+      
+      const color = colors[type] || colors.success;
+      
+      successMsg.innerHTML = `<p class="text-sm font-medium" style="color: ${color.text};">${color.icon} ${message}</p>`;
+      successMsg.style.background = color.bg;
+      successMsg.style.borderColor = color.border;
+      successMsg.classList.remove('hidden');
+      
+      setTimeout(() => {
+        successMsg.classList.add('hidden');
+      }, 4000);
+    }
+    
+    function showLoading(message) {
+      document.getElementById('loadingMessage').textContent = message || 'Memproses...';
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    function updateConnectionStatus(status, text, message) {
+      const statusEl = document.getElementById('connectionStatus');
+      const iconEl = statusEl.querySelector('.loading-spinner');
+      const textEl = statusEl.querySelector('p');
+      
+      // Hapus spinner jika tidak loading
+      if (status !== 'loading') {
+        iconEl.style.display = 'none';
+      } else {
+        iconEl.style.display = 'inline-block';
+      }
+      
+      const statuses = {
+        connected: { text: '✓ Terhubung', color: '#15803d', bg: '#f0fdf4', border: '#bbf7d0' },
+        error: { text: '✗ Gagal', color: '#991b1b', bg: '#fef2f2', border: '#fecaca' },
+        loading: { text: 'Menghubungkan...', color: '#ca8a04', bg: '#fefbeb', border: '#fde047' }
+      };
+      
+      const currentStatus = statuses[status] || statuses.loading;
+      
+      textEl.textContent = message || text;
+      textEl.style.color = currentStatus.color;
+      statusEl.style.background = currentStatus.bg;
+      statusEl.style.borderColor = currentStatus.border;
+    }
+
+    function showStudentPreview(studentData, mode) {
+      window.currentPreviewStudent = studentData; // Simpan data untuk tombol Edit
+      
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+      modal.style.background = 'rgba(0, 0, 0, 0.8)';
+      
+      const actionText = mode === 'create' ? 'Data Baru Disimpan' : 'Data Berhasil Diperbarui';
+      const actionColor = mode === 'create' ? 'bg-green-600' : 'bg-yellow-600';
+      
+      modal.innerHTML = `
+        <div class="max-w-2xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden animate-slideIn">
+          <div class="p-6 ${actionColor} text-white">
+            <h2 class="text-2xl font-bold mb-1">${actionText}</h2>
+            <p>Pratinjau data siswa yang baru saja Anda proses.</p>
+          </div>
+          
+          <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto scrollbar-thin">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-500">Nama Lengkap</span>
+                <span class="font-semibold text-lg text-gray-900">${studentData.nama_lengkap}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-500">Kelas</span>
+                <span class="font-semibold text-lg text-gray-900">${studentData.kelas_sekarang}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-500">NIS</span>
+                <span class="font-semibold text-gray-900">${studentData.nis}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-500">NISN</span>
+                <span class="font-semibold text-gray-900">${studentData.nisn}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-500">Tempat, Tanggal Lahir</span>
+                <span class="font-semibold text-gray-900">${studentData.tempat_lahir}, ${new Date(studentData.tanggal_lahir).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-500">Jenis Kelamin</span>
+                <span class="font-semibold text-gray-900">${studentData.jenis_kelamin}</span>
+              </div>
+            </div>
+            
+            <hr class="border-gray-200">
+            
+            <div class="space-y-4">
+              <h4 class="font-bold text-lg text-gray-700 border-b-2 border-indigo-200 pb-2">Detail Lainnya</h4>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div class="flex justify-between md:flex-col"><span class="text-gray-600">Agama:</span> <span class="font-medium text-gray-800">${studentData.agama}</span></div>
+                <div class="flex justify-between md:flex-col"><span class="text-gray-600">Status Keluarga:</span> <span class="font-medium text-gray-800">${studentData.status_keluarga}</span></div>
+                <div class="flex justify-between md:flex-col"><span class="text-gray-600">Anak ke:</span> <span class="font-medium text-gray-800">${studentData.anak_ke}</span></div>
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <h4 class="font-bold text-lg text-gray-700 border-b-2 border-indigo-200 pb-2">👨‍👩‍👧‍👦 Data Keluarga</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><span class="text-gray-600">Nama Ayah:</span> <span class="font-medium text-gray-800">${studentData.nama_ayah}</span></div>
+                <div><span class="text-gray-600">Nama Ibu:</span> <span class="font-medium text-gray-800">${studentData.nama_ibu}</span></div>
+                <div><span class="text-gray-600">Pekerjaan Ayah:</span> <span class="font-medium text-gray-800">${studentData.pekerjaan_ayah}</span></div>
+                <div><span class="text-gray-600">Pekerjaan Ibu:</span> <span class="font-medium text-gray-800">${studentData.pekerjaan_ibu}</span></div>
+                <div class="md:col-span-2"><span class="text-gray-600">Alamat Ortu:</span> <span class="font-medium text-gray-800">${studentData.alamat_orangtua}</span></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-6 bg-gray-50 flex justify-end space-x-3">
+            <button onclick="editFromPreview()" class="px-5 py-2 rounded-lg font-medium text-white transition-all duration-200" style="background: #f59e0b;">✏️ Edit Lagi</button>
+            <button onclick="closePreviewAndReturn()" class="px-5 py-2 rounded-lg font-medium text-white transition-all duration-200" style="background: #667eea;">✅ Selesai (Kembali)</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+    
+    function editFromPreview() {
+      // Close preview modal
+      const modal = document.querySelector('.fixed.inset-0');
+      if (modal) {
+        modal.remove();
+      }
+      
+      // Data sudah ada di form, tinggal pastikan statusnya "update"
+      const student = currentStudents.find(s => s.nis === window.currentPreviewStudent.nis);
+      if (student) {
+        fillFormWithStudentData(student);
+        currentEditingStudent = student;
+        showUpdateButtons();
+        showMessage('Mode edit diaktifkan. Ubah data yang diperlukan lalu klik "Ubah Data Siswa".', 'info');
+      }
+    }
+
+    function closePreviewAndReturn() {
+      // Close preview modal
+      const modal = document.querySelector('.fixed.inset-0');
+      if (modal) {
+        modal.remove();
+      }
+      // Return to splash screen after delay
+      setTimeout(() => {
+        backToSplash();
+      }, 300); // Perkecil delay
+    }
+
+    function fillFormWithStudentData(student) {
+      document.getElementById('nama_lengkap').value = student.nama_lengkap || '';
+      document.getElementById('nisn').value = student.nisn || '';
+      document.getElementById('nis').value = student.nis || '';
+      document.getElementById('tempat_lahir').value = student.tempat_lahir || '';
+      document.getElementById('tanggal_lahir').value = student.tanggal_lahir || '';
+      document.getElementById('jenis_kelamin').value = student.jenis_kelamin || '';
+      document.getElementById('agama').value = student.agama || '';
+      document.getElementById('status_keluarga').value = student.status_keluarga || '';
+      document.getElementById('anak_ke').value = student.anak_ke || '';
+      document.getElementById('alamat').value = student.alamat || '';
+      document.getElementById('no_telepon').value = student.no_telepon || '';
+      document.getElementById('sekolah_asal').value = student.sekolah_asal || '';
+      document.getElementById('kelas_diterima').value = student.kelas_diterima || '';
+      document.getElementById('tanggal_diterima').value = student.tanggal_diterima || '';
+      document.getElementById('kelas_sekarang').value = student.kelas_sekarang || '';
+      document.getElementById('tahun_ajaran').value = student.tahun_ajaran || '';
+      document.getElementById('nama_ayah').value = student.nama_ayah || '';
+      document.getElementById('nama_ibu').value = student.nama_ibu || '';
+      document.getElementById('pekerjaan_ayah').value = student.pekerjaan_ayah || '';
+      document.getElementById('pekerjaan_ibu').value = student.pekerjaan_ibu || '';
+      document.getElementById('alamat_orangtua').value = student.alamat_orangtua || '';
+      document.getElementById('no_telepon_orangtua').value = student.no_telepon_orangtua || '';
+      document.getElementById('nama_wali').value = student.nama_wali || '';
+      document.getElementById('alamat_wali').value = student.alamat_wali || '';
+      document.getElementById('no_telepon_wali').value = student.no_telepon_wali || '';
+      document.getElementById('pekerjaan_wali').value = student.pekerjaan_wali || '';
+      
+      // Centang checkbox verifikasi karena data sudah ada
+      document.getElementById('dataVerification').checked = true;
+    }
+
+  </script>
+ </body>
+</html>
