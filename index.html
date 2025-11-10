@@ -213,17 +213,31 @@
          <p>Belum ada data siswa</p>
         </div>
        </div>
-      </div><div class="card p-6">
-       <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">⚠️ Belum Input Data</h3>
-       <div id="missingDataList" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
-        <div class="text-center py-8 text-gray-500">
-         <div class="text-4xl mb-2">
-          ✅
-         </div>
-         <p>Memuat data...</p>
-        </div>
-       </div>
       </div>
+<div class="card p-6">
+ <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">⚠️ Belum Input Data</h3>
+ 
+ <div class="mb-4">
+  <select id="missingDataClassFilter" class="w-full px-4 py-2 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;">
+   <option value="">Semua Kelas</option>
+   <option value="VII-A">VII-A</option>
+   <option value="VII-B">VII-B</option>
+   <option value="VII-C">VII-C</option>
+   <option value="VII-D">VII-D</option>
+   <option value="VII-E">VII-E</option>
+   <option value="VII-F">VII-F</option>
+   <option value="VII-G">VII-G</option>
+  </select>
+ </div>
+ <div id="missingDataList" class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+  <div class="text-center py-8 text-gray-500">
+   <div class="text-4xl mb-2">
+    ✅
+   </div>
+   <p>Memuat data...</p>
+  </div>
+ </div>
+</div>
      </div><div class="card p-6 mt-6">
       <h3 class="text-xl font-bold mb-4 flex items-center" style="color: #667eea;">🗂️ Manajemen Data Siswa</h3><div class="mb-4 flex flex-col sm:flex-row gap-4">
        <div class="flex-1"><input type="text" id="adminSearch" placeholder="🔍 Cari nama siswa..." class="w-full px-4 py-2 border-2 rounded-lg focus:outline-none" style="border-color: #e2e8f0; background: #f7fafc;">
@@ -1560,4 +1574,5 @@
 
   </script>
  </body>
+
 </html>
