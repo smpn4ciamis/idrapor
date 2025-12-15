@@ -30,6 +30,7 @@
   "SOFIA LUNNA KRISNA PUTRI": { "nis": "25267030", "nisn": "3127562441", "kelas": "VII-A" },
   "TAFIF MUHAMAD ARI KASIDI": { "nis": "25267031", "nisn": "0129446106", "kelas": "VII-A" },
   "VITO ISMANTORO": { "nis": "25267032", "nisn": "3126958522", "kelas": "VII-A" },
+  "ZAHRA DESTYANI": { "nis": "", "nisn": "3128656416", "kelas": "VII-A" },
   "ADELIA FITRI": { "nis": "25267033", "nisn": "0123240898", "kelas": "VII-B" },
   "ALFIN ARKAN RAFFASYA": { "nis": "25267034", "nisn": "0131949977", "kelas": "VII-B" },
   "AMANDA RIZKA AULIA PUTRI": { "nis": "25267035", "nisn": "0128772894", "kelas": "VII-B" },
@@ -221,4 +222,5 @@
   "WIDYA NURAISAH": { "nis": "25267222", "nisn": "0128742767", "kelas": "VII-G" },
   "ZAHFA ZIA ZHAFIRA ZEIN BORU TAMPUBOLON": { "nis": "25267223", "nisn": "3126881352", "kelas": "VII-G" },
   "ZAHWA KHALIFAH FAUZIAH": { "nis": "25267224", "nisn": "0129581508", "kelas": "VII-G" }
+
 }
